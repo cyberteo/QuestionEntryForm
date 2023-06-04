@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      background-color: #330033;
+      color: #ff33cc;
+      font-family: "Courier New", monospace;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .question-container {
+      background-color: #330033;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .question-text {
+      margin-top: 0;
+    }
+
+    .question-options {
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    .question-option {
+      margin-bottom: 10px;
+    }
+
+    .question-option input[type="radio"] {
+      margin-right: 10px;
+    }
+
+    .question-option-label {
+      color: #ff33cc;
+    }
+
+    .question-option-correct {
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    .question-option-incorrect {
+      color: #ff0000;
+      font-weight: bold;
+    }
+
+    .result-table {
+      width: 200px;
+      margin: 0 auto;
+    }
+
+    .result-table th,
+    .result-table td {
+      padding: 5px;
+      text-align: center;
+    }
+
+    .footer-menu {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #330033;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .footer-menu a {
+      color: #ff33cc;
+      text-decoration: none;
+      margin-right: 10px;
+    }
+  </style>
+  <script>
+    var testQuestions = [];
+    var questionIndex = 0;
+    var correctCount = 0;
+    var incorrectCount = 0;
+
+    function analyze() {
+      var jsonInput = document.getElementById('jsonInput').value;
+
+      try {
+        var jsonData = JSON.parse(jsonInput);
+        testQuestions = jsonData['1'];
+        questionIndex = 0;
+        correctCount = 0;
+        incorrectCount = 0;
+        start();
+      } catch (error) {
+        alert('Invalid JSON data!');
+      }
+    }
+
+    function start() {
+      document.getElementById('jsonAnalysisScreen').style.display = 'none';
+      document.getElementById('questionScreen').style.display = 'block';
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      if (questionIndex < testQuestions.length) {
+        var question = testQuestions[questionIndex];
+
+        var questionText = document.getElementById('questionText');
+        questionText.textContent = question.question;
+
+        var optionsContainer = document.getElementById('optionsContainer');
+        optionsContainer.innerHTML = '';
+
+        for (var i = 0; i < question.options.length; i++) {
+          var option = question.options[i];
+
+          var optionDiv = document.createElement('div');
+          optionDiv.className = 'question-option';
+
+          var optionInput = document.createElement('input');
+          optionInput.type = 'radio';
+          optionInput.name = 'option';
+          optionInput.value = String.fromCharCode(97 + i); // Generating A, B, C, D letters using ASCII code
+
+          var optionLabel = document.createElement('label');
+          optionLabel.className = 'question-option-label';
+          optionLabel.textContent = option;
+
+          optionDiv.appendChild(optionInput);
+          optionDiv.appendChild(optionLabel);
+          optionsContainer.appendChild(optionDiv);
+        }
+
+        questionIndex++;
+        document.getElementById('answerButton').classList.remove('passive');
+        document.getElementById('answerButton').textContent = 'Check Answer';
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      document.getElementById('questionScreen').style.display = 'none';
+      document.getElementById('resultScreen').style.display = 'block';
+
+      var resultTable = document.getElementById('resultTable');
+      resultTable.innerHTML = '';
+
+      var titleTr = document.createElement('tr');
+      var titleCorrectTh = document.createElement('th');
+      titleCorrectTh.textContent = 'Correct';
+      var titleIncorrectTh = document.createElement('th');
+      titleIncorrectTh.textContent = 'Incorrect';
+
+      titleTr.appendChild(titleCorrectTh);
+      titleTr.appendChild(titleIncorrectTh);
+      resultTable.appendChild(titleTr);
+
+      var resultTr = document.createElement('tr');
+      var correctTd = document.createElement('td');
+      correctTd.textContent = correctCount;
+      var incorrectTd = document.createElement('td');
+      incorrectTd.textContent = incorrectCount;
+
+      resultTr.appendChild(correctTd);
+      resultTr.appendChild(incorrectTd);
+      resultTable.appendChild(resultTr);
+    }
+
+    function checkAnswer() {
+      var selectedOption = document.querySelector('input[name="option"]:checked');
+      if (!selectedOption) {
+        alert('Select an option!');
+        return;
+      }
+
+      var question = testQuestions[questionIndex - 1];
+      var correctOption = question.answer.toLowerCase();
+
+      if (selectedOption.value === correctOption) {
+        correctCount++;
+        selectedOption.nextElementSibling.classList.add('question-option-correct');
+      } else {
+        incorrectCount++;
+        selectedOption.nextElementSibling.classList.add('question-option-incorrect');
+      }
+
+      selectedOption.disabled = true;
+      document.getElementById('answerButton').classList.add('passive');
+      document.getElementById('answerButton').textContent = 'Answered';
+      setTimeout(nextQuestion, 1000);
+    }
+  </script>
+</head>
+<body>
+  <div id="jsonAnalysisScreen">
+    <div class="title">JSON Analysis</div>
+    <textarea id="jsonInput" cols="50" rows="10"></textarea><br>
+    <button onclick="analyze()">Start Test</button>
+  </div>
+
+  <div id="questionScreen" style="display: none;">
+    <div class="title">Question</div>
+    <div class="question-container">
+      <p id="questionText"></p>
+      <div class="question-options" id="optionsContainer"></div>
+      <button id="answerButton" onclick="checkAnswer()" class="passive">Check Answer</button>
+    </div>
+  </div>
+
+  <div id="resultScreen" style="display: none;">
+    <div class="title">Results</div>
+    <table class="result-table" id="resultTable"></table>
+  </div>
+
+  <div class="footer-menu">
+    <a href="#">Home</a>
+    <a href="#">About Us</a>
+    <a href="#">Contact</a>
+  </div>
+</body>
+</html>
+
+<!-- Design and coding by github.com/cyberteo -->
