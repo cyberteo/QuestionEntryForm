@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Question Entry</title>
+  <style>
+    body {
+      background-color: #0A0708;
+      color: #6EDFF8;
+      font-family: 'Courier New', monospace;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      background-color: #0A0708;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    h2 {
+      text-align: center;
+      color: #6EDFF8;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      color: #6EDFF8;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #6EDFF8;
+      margin-bottom: 10px;
+      font-size: 14px;
+      background-color: #0A0708;
+      color: #6EDFF8;
+    }
+
+    textarea {
+      height: 100px;
+    }
+
+    input[type="button"] {
+      background-color: #6EDFF8;
+      color: #0A0708;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    input[type="button"]:hover {
+      background-color: #0A0708;
+      color: #6EDFF8;
+    }
+
+    #questionJSON {
+      background-color: #0A0708;
+      border-radius: 5px;
+      padding: 10px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      color: #6EDFF8;
+    }
+
+    button {
+      background-color: #6EDFF8;
+      color: #0A0708;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0A0708;
+      color: #6EDFF8;
+    }
+
+    @keyframes color-transition {
+      0% {
+        background-color: #330033;
+      }
+      50% {
+        background-color: #121825;
+      }
+      100% {
+        background-color: #1D2A43;
+      }
+    }
+
+    @keyframes text-transition {
+      0% {
+        color: #6EDFF8;
+      }
+      50% {
+        color: #a445f1;
+      }
+      75% {
+        color: yellow;
+      }
+      100% {
+        color: #17C3FF;
+      }
+    }
+
+    body, input, textarea, button {
+      animation-name: color-transition;
+      animation-duration: 25s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
+
+    h2, label, #questionJSON {
+      animation-name: text-transition;
+      animation-duration: 5s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
+  </style>
+  <script>
+    var weekQuestions = {};
+
+    function addQuestion() {
+      var weekNo = document.getElementById('weekNo').value;
+      var questionNo = document.getElementById('questionNo').value;
+      var questionText = document.getElementById('questionText').value;
+      var optionA = document.getElementById('optionA').value;
+      var optionB = document.getElementById('optionB').value;
+      var optionC = document.getElementById('optionC').value;
+      var optionD = document.getElementById('optionD').value;
+      var correctAnswer = document.getElementById('correctAnswer').value;
+
+      var questionJSON = {
+        "questionNo": questionNo,
+        "question": questionText,
+        "options": [optionA, optionB, optionC, optionD],
+        "answer": correctAnswer
+      };
+
+      // Add the question to the respective sub-array based on the week number
+      if (!weekQuestions.hasOwnProperty(weekNo)) {
+        weekQuestions[weekNo] = [];
+      }
+      weekQuestions[weekNo].push(questionJSON);
+
+      // Display the JSON data
+      var jsonText = JSON.stringify(weekQuestions, null, 2);
+      document.getElementById('questionJSON').textContent = jsonText;
+    }
+
+    function copyJSON() {
+      var jsonText = document.getElementById('questionJSON').textContent;
+      navigator.clipboard.writeText(jsonText).then(function() {
+        alert('JSON successfully copied!');
+      }, function() {
+        alert('An error occurred while copying the JSON.');
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Question Entry</h2>
+    <form>
+      <label for="weekNo">Week No:</label>
+      <input type="number" id="weekNo" required><br>
+
+      <label for="questionNo">Question No:</label>
+      <input type="number" id="questionNo" required><br>
+
+      <label for="questionText">Question Text:</label>
+      <textarea id="questionText" required></textarea><br>
+
+      <label for="optionA"><b>A)</b></label>
+      <input type="text" id="optionA" required><br>
+
+      <label for="optionB"><b>B)</b></label>
+      <input type="text" id="optionB" required><br>
+
+      <label for="optionC"><b>C)</b></label>
+      <input type="text" id="optionC" required><br>
+
+      <label for="optionD"><b>D)</b></label>
+      <input type="text" id="optionD" required><br>
+
+      <label for="correctAnswer">Correct Answer:</label>
+      <input type="text" id="correctAnswer" required><br>
+
+      <input type="button" value="Add Question" onclick="addQuestion()">
+    </form>
+
+    <div id="questionJSON"></div>
+    <br>
+    <button onclick="copyJSON()">Copy JSON</button>
+  </div>
+</body>
+</html>
